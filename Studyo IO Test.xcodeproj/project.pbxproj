@@ -28,6 +28,7 @@
 		0FE657B82C5FF4C0002EC7D6 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 0FE657B72C5FF4C0002EC7D6 /* FirebaseStorage */; };
 		0FE657BA2C5FF4C0002EC7D6 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 0FE657B92C5FF4C0002EC7D6 /* FirebaseStorageCombine-Community */; };
 		0FE657BC2C6008A9002EC7D6 /* TikTokCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE657BB2C6008A9002EC7D6 /* TikTokCopy.swift */; };
+		0FE657BF2C60C5D0002EC7D6 /* VideoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE657BE2C60C5D0002EC7D6 /* VideoData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,8 @@
 		0FE657AE2C5FF32A002EC7D6 /* VideoPlayerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerController.swift; sourceTree = "<group>"; };
 		0FE657B02C5FF3FE002EC7D6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0FE657BB2C6008A9002EC7D6 /* TikTokCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokCopy.swift; sourceTree = "<group>"; };
+		0FE657BE2C60C5D0002EC7D6 /* VideoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoData.swift; sourceTree = "<group>"; };
+		0FE657C02C60F0D5002EC7D6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +105,7 @@
 		0FE657662C5F4199002EC7D6 = {
 			isa = PBXGroup;
 			children = (
+				0FE657C02C60F0D5002EC7D6 /* README.md */,
 				0FE657712C5F4199002EC7D6 /* Studyo IO Test */,
 				0FE657842C5F419B002EC7D6 /* Studyo IO TestTests */,
 				0FE6578E2C5F419B002EC7D6 /* Studyo IO TestUITests */,
@@ -122,6 +126,7 @@
 		0FE657712C5F4199002EC7D6 /* Studyo IO Test */ = {
 			isa = PBXGroup;
 			children = (
+				0FE657BD2C60C5C2002EC7D6 /* Entities */,
 				0FE657B02C5FF3FE002EC7D6 /* GoogleService-Info.plist */,
 				0FE657AB2C5F54D1002EC7D6 /* Assets */,
 				0FE657A52C5F4D60002EC7D6 /* Controllers */,
@@ -186,6 +191,14 @@
 				0FE657AC2C5F54DE002EC7D6 /* frame_in_10_second.zip */,
 			);
 			path = Assets;
+			sourceTree = "<group>";
+		};
+		0FE657BD2C60C5C2002EC7D6 /* Entities */ = {
+			isa = PBXGroup;
+			children = (
+				0FE657BE2C60C5D0002EC7D6 /* VideoData.swift */,
+			);
+			path = Entities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -340,6 +353,7 @@
 				0FE657A72C5F4D7A002EC7D6 /* FrameExtraction.swift in Sources */,
 				0FE657AF2C5FF32A002EC7D6 /* VideoPlayerController.swift in Sources */,
 				0FE657A22C5F4CB1002EC7D6 /* VideoPlayerScreen.swift in Sources */,
+				0FE657BF2C60C5D0002EC7D6 /* VideoData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

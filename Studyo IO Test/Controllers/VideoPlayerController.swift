@@ -81,6 +81,8 @@ class CustomPlayer: AVPlayer {
     // To make things simple, enable controlling of the controller under custom player
     fileprivate var controller: VideoPlayerController?
     
+    private var timeObserverRef: Any?
+    
     override init() {
         super.init()
     }
@@ -115,7 +117,7 @@ class CustomPlayer: AVPlayer {
     private func observeEvents() {
         addObserver(self, forKeyPath: "status", options: [.old, .new], context: nil)
         addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
-        addPeriodicTimeObserver(
+        timeObserverRef = addPeriodicTimeObserver(
             forInterval: CMTimeMake(value: 1, timescale: 100),
             queue: .main
         ) { time in
@@ -159,14 +161,17 @@ class CustomPlayer: AVPlayer {
                 controller?.timeControlStatus = timeControlStatus
             }
             break
-        case "loadedTimeRanges":
-            if let loadedTimeRanges = change?[.newKey] as? [CMTimeRange], let timeRange = loadedTimeRanges.first {
-                let timeDifference = timeRange.end - timeRange.start
-                print("Loaded buffer duration: \(timeDifference.seconds)")
-            }
-            break
         default:
             break
         }
+    }
+    
+    deinit {
+        removeObserver(self, forKeyPath: "status")
+        removeObserver(self, forKeyPath: "timeControlStatus")
+        if let ref = timeObserverRef {
+            removeTimeObserver(ref)
+        }
+        currentItem?.removeObserver(self, forKeyPath: "loadedTimeRanges")
     }
 }
