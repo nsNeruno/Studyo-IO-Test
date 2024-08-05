@@ -25,4 +25,4 @@ Following the specified tasks under two documents provided for the test, within 
 - Copied the implementation of my `CustomPlayer` from previous task, but simplified it.
 - Tracking of preloaded buffer duration is done via KVO approach on `AVPlayerItem`'s `loadedTimeRanges` values.
 - The implementation is far from perfect as I spent only a few hours to quick plan about it.
-- **TEST NOTE**: I have not fully adjusted the initial playback of the first video, but performing swipes should trigger the playback. Also, there was no Loading indicators right now, if the player is not ready, a placeholder showing the technical metadata of the Video data will be shown instead.
+- **TEST NOTE**: There was no Loading indicators right now, if the player is not ready, a placeholder showing the technical metadata of the Video data will be shown instead.

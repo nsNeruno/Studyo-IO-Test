@@ -33,7 +33,8 @@ struct VideoSwipeFeatureScreen: View {
                         let videoData = videoHolder.videoData
                         if let player = videoHolder.player {
                             VideoPlayer(player: player)
-                                .frame(width: height, height: width)
+                                .ignoresSafeArea()
+                                .frame(width: width, height: height)
                                 .rotationEffect(.degrees(-90))
                                 .tag(i)
                         } else {

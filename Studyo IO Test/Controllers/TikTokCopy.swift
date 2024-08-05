@@ -12,17 +12,22 @@ import FirebaseStorage
 
 class TikTokCopy: ObservableObject {
     
-    @Published private (set) var error: Error?
+    @Published fileprivate (set) var error: Error?
     @Published private (set) var videoHolders: [VideoHolder] = [] {
         didSet {
             if !videoHolders.isEmpty {
-                loadVideoAt(0)
+                // Added some delay before loading the video
+                // Loads the first video
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.loadVideoAt(0)
+                }
             }
         }
     }
     
     init() {
         Task { @MainActor in
+            // Fetch Video Listing
             await fetchVideoInfo()
         }
     }
@@ -30,19 +35,18 @@ class TikTokCopy: ObservableObject {
     func loadVideoAt(_ index: Int) {
         let count = videoHolders.count
         if index < count {
-            let videoHolder = videoHolders[index]
             let prevIndex = index - 1
             let nextIndex = index + 1
             
             for i in videoHolders.indices {
                 let mVideoHolder = videoHolders[i]
-                if ![prevIndex, index, nextIndex].contains(i) {
-                    mVideoHolder.releasePlayer()
-                } else {
+                if (prevIndex...nextIndex).contains(i) {
                     mVideoHolder.initPlayer(playWhenReady: i == index)
                     if i != index {
                         mVideoHolder.player?.pause()
                     }
+                } else {
+                    mVideoHolder.releasePlayer()
                 }
             }
         }
@@ -63,9 +67,14 @@ class TikTokCopy: ObservableObject {
             let videoDataList = snapshots.documents.map { snapshot in
                 return videoDataFromDocument(snapshot.documentID, snapshot.data())
             }
-            self.videoHolders = videoDataList.map({ videoData in
-                VideoHolder(videoData)
-            })
+            DispatchQueue.main.async {
+                self.videoHolders = videoDataList.map({ videoData in
+                    let holder = VideoHolder(videoData)
+                    // IMPORTANT: Attaching this controller ref to each holder to delegate force refresh capability
+                    holder.controller = self
+                    return holder
+                })
+            }
         } catch {
             DispatchQueue.main.async {
                 self.error = error
@@ -89,15 +98,6 @@ class SwipeableVideoPlayer: AVPlayer {
         super.init(playerItem: item)
     }
     
-    init(url URL: URL, videoData: VideoData) {
-        super.init(url: URL)
-        self.videoData = videoData
-        addObserver(self, forKeyPath: "status", options: [.new], context: nil)
-        currentItem?.addObserver(
-            self, forKeyPath: "loadedTimeRanges", options: [.new], context: nil
-        )
-    }
-    
     init(
         url URL: URL,
         videoData: VideoData,
@@ -108,10 +108,12 @@ class SwipeableVideoPlayer: AVPlayer {
         self.videoData = videoData
         self.playWhenReady = playWhenReady
         self.onPlayerBufferReady = onPlayerBufferReady
-        addObserver(self, forKeyPath: "status", options: [.old, .new], context: nil)
+        // Observe playback readiness
+        addObserver(self, forKeyPath: "status", options: [.new], context: nil)
+        // Observe loaded buffers
         if let item = currentItem {
             item.addObserver(
-                self, forKeyPath: "loadedTimeRanges", options: [.old, .new], context: nil
+                self, forKeyPath: "loadedTimeRanges", options: [.new], context: nil
             )
         }
     }
@@ -119,14 +121,7 @@ class SwipeableVideoPlayer: AVPlayer {
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         switch keyPath {
         case "status":
-            var oldStatus: AVPlayer.Status?
             var playerStatus: AVPlayer.Status?
-            
-            if let status = change?[.oldKey] as? AVPlayer.Status {
-                oldStatus = status
-            } else if let i = change?[.oldKey] as? Int {
-                oldStatus = AVPlayer.Status(rawValue: i)
-            }
             
             if let status = change?[.newKey] as? AVPlayer.Status {
                 playerStatus = status
@@ -134,7 +129,7 @@ class SwipeableVideoPlayer: AVPlayer {
                 playerStatus = AVPlayer.Status(rawValue: i)
             }
             
-            if playWhenReady && oldStatus != .readyToPlay && playerStatus == .readyToPlay {
+            if playWhenReady && playerStatus == .readyToPlay {
                 play()
             }
             break
@@ -146,6 +141,7 @@ class SwipeableVideoPlayer: AVPlayer {
                         if self.playWhenReady {
                             self.play()
                         }
+                        self.onPlayerBufferReady?(self)
                     }
                 }
             }
@@ -188,18 +184,26 @@ class VideoHolder: Identifiable {
         }
         
         Storage.storage().reference(withPath: videoData.path).downloadURL { url, error in
-            if let url = url {
-                self.player = SwipeableVideoPlayer(
-                    url: url,
-                    videoData: self.videoData,
-                    playWhenReady: playWhenReady
-                ) { player in
-                    self.controller?.objectWillChange.send()
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.controller?.error = error
+                    return
+                }
+                if let url = url {
+                    self.player = SwipeableVideoPlayer(
+                        url: url,
+                        videoData: self.videoData,
+                        playWhenReady: playWhenReady
+                    ) { player in
+                        // Ensuring the View is force refreshed to notify that the player is ready
+                        self.controller?.objectWillChange.send()
+                    }
                 }
             }
         }
     }
     
+    // Release resources of the player
     fileprivate func releasePlayer() {
         player?.pause()
         player?.removeRefs()
